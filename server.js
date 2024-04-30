@@ -1,23 +1,47 @@
-/*
-  Nome do arquivo: server.js
-  Descrição: Este arquivo contém a configuração e inicialização do servidor.
-  Autor: Michelle D. Pacheco
-  Data: 30/04/2024
-*/
-
-
 import { fastify } from "fastify";
+import { DatabaseMemory } from "./database-memory.js";
 
 const server = fastify()
 
-// Rota para criar um novo vídeo
-server.post('/videos', () =>{
+const database = new DatabaseMemory()
 
-    // Retorna uma resposta de sucesso com o novo vídeo criado
-    // Se ocorrer algum erro durante o processo de criação do vídeo, ele será capturado aqui
-    // Retorna uma resposta de erro indicando o problema
+server.post('/videos', (request, reply) => {
+    const { title, description, duration } = request.body
 
-    return 'teste'
+    database.create({
+        title,
+        description,
+        duration
+    })
+    console.log(request.body)
+    return reply.status(201).send()
+})
+
+
+server.get('/videos', (request) =>{
+    const search = request.query.search
+
+    const videos = database.list(search)
+
+    return videos
+ })
+
+server.put('/videos/:id', (request, reply) =>{
+    const videoID = request.params.id
+    const {title, description, duration } = request.body
+
+    database.update(videoID, {
+        title,
+        description, 
+        duration
+    })
+
+    return reply.status(204).send()
+})
+
+server.delete('/videos/:id', () =>{
+
+    return 'deletar video'
 })
 
 
