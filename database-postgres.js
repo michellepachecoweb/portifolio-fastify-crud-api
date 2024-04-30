@@ -1,34 +1,32 @@
 import { randomUUID } from "node:crypto";
-import { sql } from "./db.js";
+import {sql} from './db.js'
+export class DatabasePostgres {
+    // o cardinal indica que a variavel so vai ser visivel aqui dentro
 
-export class databasePostgres {
+   
 
-    async list(search) {
-       let videos
-
-       if (search) {
-        videos = await sql`select * from videos where title ilike ${'%' + search + '%'}`
-       }else{
-        videos = await sql`select * from videos`
-       }
-
-       return videos
+   async list(search) {
+        let videos 
+        if(search){
+        return    videos =  await sql`select * from videos where title ilike ${'%'+search+'%'}`
+        }else{
+           return videos=  await sql`select * from videos`
+        }
+        // converte uma estrutura de dados em array
     }
-
-    async create(video) {
-        const videoID = randomUUID()
-
-        await sql`insert into videos (id, title, description, duration) VALUES (${videoID}, ${title}, ${description}, ${duration})`
+ async create(video) {
+         const videoId= randomUUID()
+         const {title,description,duration}= video
+         await sql `insert into videos(id, title,description,duration) values (${videoId},${title},${description},${duration})`
     }
-
-    async update(id, video) {
-        const { title, description, duration } = video
+   async update(id, video) {
+        const {title,description,duration}= video
+       await sql` UPDATE videos set title = ${title},description= ${description},duration = ${duration} where id = ${id}`
         
-        await sql`update videos set title = ${title}, description = ${description}, duration = ${duration}) WHERE id =${id}`
+    }
+   async delete(id) {
+ await sql` delete from videos where id=${id} `
+        
     }
 
-    async delete(id) {
-        await sql`delete from videos WHERE id =${id}`
-
-    }
 }

@@ -1,58 +1,53 @@
-import { fastify } from "fastify";
-// import { DatabaseMemory } from "./database-memory.js";
-import { databasePostgres } from "./database-postgres.js";
+// import { createServer} from 'node:http'
+// const server = createServer((req,res)=>{
+//     console.log("hello world")
+//     res.end()
+// })
+// server.listen(3333)
 
+import { fastify } from "fastify";
+import { DatabaseMemory } from "./database-memory.js";
+import { DatabasePostgres } from "./database-postgres.js";
+//const database = new DatabaseMemory()
+const database= new DatabasePostgres()
 const server = fastify()
 
-// const database = new DatabaseMemory()
-const database = new databasePostgres()
+server.get('/videos',async (request) => {
+const search= request.query.search
 
-server.post('/videos', async(request, reply) => {
-    const { title, description, duration } = request.body
+   const videos = await database.list(search)
+   return videos
+})
 
-    await database.create({
+server.post('/videos', async (request, reply) => {
+
+    const {title,description,duration}= request.body
+ await   database.create({
         title,
         description,
-        duration
+        duration,
     })
-    console.log(request.body)
+
     return reply.status(201).send()
+    // o status 201 indica que algo foi criado no nosso servidor
 })
-
-
-server.get('/videos', async(request) =>{
-    const search = request.query.search
-
-    const videos = await database.list(search)
-
-    return videos
- })
-
-server.put('/videos/:id', async(request, reply) =>{
-    const videoId = request.params.id
-    const {title, description, duration } = request.body
-
-    await database.update(videoId, {
+server.put('/videos/:id', async(request, reply) => {
+ const videoId= request.params.id
+    const {title,description,duration}= request.body
+  await database.update(videoId,{
         title,
-        description, 
-        duration
+        description,
+        duration,
     })
 
     return reply.status(204).send()
+    // o status 204 indica que algo que teve sucesso, mas nao tem nenhum retorno 
 })
+server.delete('/videos/:id',async (res,response) => {
+    const videosId= res.params.id
+  await  database.delete(videosId)
 
-server.delete('/videos/:id', async(request, reply) =>{
-    const videoId = request.params.id
-
-    await database.delete(videoId)
-
-    return reply.status(204).send()
+    return response.status(204).send()
 })
-
-const port = process.env.PORT || 3333;
-
-// http://localhost:3333
 server.listen({
-    host: '0.0.0.0',
-    port: port,
-})
+     port: process.env.PORT ??  3333 })
